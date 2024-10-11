@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(userServiceContainer, "Device Service") {
+
+    Component(userController, "User Controller", "Next.js Controller", "Обрабатывает пользовательские запросы")
+    Component(userService, "User Service", "", "Создание и управление пользователями")
+    Component(commandSevice, "Command Service", "", "Создание и отправка комманд, сохранение команд согласно AuditLogs")
+    Component(userRepository, "User Repository", "PostgresSQL Node.js client", "Хранит и управляет данными о пользователях.")
+
+
+    Rel(userController, userService, "Направляет dto в сервис управления пользователями")
+    Rel(userController, commandSevice, "Обработка комманд пользователя")
+    Rel(userService, userRepository, "Обращение к хранилищу")
+
+}
+
+Container_Ext(apiGateway, "API Gateway", "Kong", "API Gateway")
+Container_Ext(deviceService, "Device Service", "Golang framework", "Управление устройствами")
+Container_Ext(telemetryService, "Telemetry Service", "Golang Framework", "Управление телеметрией")
+
+Rel(apiGateway, userController, "Пользовательские запросы")
+Rel(commandSevice, deviceService, "Отправляет команды устройствам и целевую температуру для помещений")
+Rel(userService, telemetryService, "Считывает телеметрические данные")
+
+SHOW_LEGEND()
+@enduml
