@@ -1,0 +1,81 @@
+@startuml
+!include <C4/C4_container>
+
+
+Container_Boundary(deviceServiceContainer, "Device Service") {
+    Container(deviceService, "Device Service", "Golang framework", "Котнролирует и устанавливает температуру которую должны поддерживать устройства")
+    ContainerDb(deviceDatabase, "Device Database", "Dynamo DB", "Хранит данные в виде ключ-значение, ид устройства и целевую температуру")
+}
+
+Container_Boundary(telemetryServiceContainer, "Telemetry Service") {
+    Container(telemetryService, "Telemetry Service", "Golang framework", "Получает данные из Kafka от сенсоров, также хранит историю изменения температуры")
+    ContainerDb(telemetryDatabase, "Telemetry Database", "Mongo", "Хранит температуру для каждого устройства и timestamp")
+}
+
+Container_Boundary(userServiceContainer, "User Service") {
+    Container(userService, "User Service", "Node.js", "Управляет данными пользователей")
+    ContainerDb(userDatabase, "User Database", "PostgreSQL", "Хранит данные о пользователях и историю всех его комманд, в соотвествии с паттерном AuditLog")
+}
+
+Container_Boundary(AdminServiceContainer, "Admin Service") {
+    Container(adminService, "Admin Service", "Node.js", "Управляет данными о владельцах SaaS, предоставляет разные метрики")
+    ContainerDb(adminDatabase, "Admin Database", "PostgreSQL", "Хранит данные об админах")
+}
+
+Container_Boundary(authServiceContainer, "Authentification Service") {
+    Container(authService, "Auth Service", "Node.js", "Генерирует JWT для пользователей")
+}
+
+Container_Boundary(LocationServiceContainer, "Location Service") {
+    Container(locationService, "Location Service", "Node.js", "Предоставляет данные о расположении датчиков, так же группирует их по домам и поселкам, позволяет создавать карты расположения по регионам")
+    ContainerDb(locationDatabase, "Location Database", "PostgreSQL", "Хранит данные о расположении.")
+}
+
+
+Container_Boundary(apiGatewayContainer, "API Gateway") {
+    Container(apiGateway, "API Gateway", "Kong", "Точка входа для пользователей и администраторов")
+}
+
+Container_Boundary(grafanaContainer, "Grafana") {
+    Container(grafana, "Grafana", "", "Для дебаггинга согласно паттерну Distributed sourcing, выявление проблем с производительноостью")
+}
+
+
+Container_Boundary(kafkaContainer, "Kafka") {
+    Container(kafka, "Kafka broker", "Apache Kafka", "Точка входа для сенсоров, сенсоры посылают данные по MQTT в прокси(например EMQX), а прокси отправляет данные в Kafka топики. Сервис устройств и телеметрии читают данные с Kafka топиков.")
+}
+
+Container_Boundary(mqttBrokerContainer, "MQTT Broker") {
+    Container(mqttBroker, "API Gateway", "Spring Boot", "Устройства подключаются к брокеру и ждут команд по MQTT")
+}
+
+Container_Ext(user, "Пользователь", "Взаимодействует с API Gateway для управления домом и устройствами.")
+Container_Ext(admin, "Пользователь", "Взаимодействует с API Gateway для управления домом и устройствами.")
+Container_Ext(sensor, "Датчики", "Отправляют данные по MQTT")
+
+
+Rel(user, apiGateway, "Управление устройствами")
+Rel(admin, apiGateway, "Просмотр метрик и статусов устройств, для техническом поддержки")
+
+Rel(apiGateway, userService, "Добавление информации об устройствах пользователя, генерация AuditLogs")
+Rel(apiGateway, adminService, "Наблюдение за состоянием системы")
+Rel(apiGateway, authService, "Логин.регистрация. Генерация JWT")
+
+Rel(userService, deviceService, "Установка целевых значений температуры")
+Rel(userService, telemetryService, "Просмотр и мониторинг температуры")
+Rel(userService, locationService, "Добавление данных о расположении устройств")
+
+Rel(adminService, telemetryService, "Просмотр состояния системы")
+Rel(adminService, locationService, "Просмотри и генерация отчетов по поселкам и домам")
+
+Rel(admin, grafana, "Просмотр и мониторинг запросов")
+Rel(deviceService, grafana, "Публикация информации о входящих запросах")
+Rel(kafka, grafana, "Подключения через kafka plugin for Grafana, для выявления узких мест, очень важно чтоб не было задержек в мониторинге девайсов")
+Rel(mqttBroker, kafka, "Передает данные от сенсоров в топики Kafka")
+Rel(sensor, mqttBroker, "Отправка данных по MQTT")
+Rel(telemetryService, kafka, "Чтение данных с Kafka")
+Rel(deviceService, kafka, "Чтение данных с Kafka")
+Rel(deviceService, mqttBroker, "Передача команд управления устройствами")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+title FitLife Context Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "Пользователь устройствами отопления")
+System(SmartHomeMonolith, "Smart home monolith", "Управляет отоплением")
+
+System(Device, "Heating Sensors", "Отправляют и принимают данные от системы")
+
+Rel(user, SmartHomeMonolith, "Отправляет данные для управления отоплением")
+Rel(SmartHomeMonolith,Device,"Получает данные от датчиков для мониторинга")
+Rel(Device,SmartHomeMonolith,"Получает команды от системы")
+
+@enduml

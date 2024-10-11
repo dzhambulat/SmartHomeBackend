@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(locationServiceContainer, "Location Service") {
+
+    Component(locationController, "Location Controller", "Next.js contoller", "Эндпоинты для предоставления AdminService данных о расположении устройств")
+    Component(locationRepository, "Location Repository", "PostgresSQL клиент", "Чтение и запись данных по расположению устройств")
+    Component(locationService, "Location Service", "", "Бизнес логика для предоставления отчетов и агрегации данных о расположении устройств")
+    
+    Rel(locationController, locationService, "Получает данных от locationService")
+    Rel(locationService, locationRepository, "Подключается к хранилищу")
+
+}
+
+Container_Ext(UserService, "User Service")
+Container_Ext(AdminService, "Admin Service")
+
+Rel(UserService, locationController, "Отправляет post запросы для добавления данных об устройствах пользователя с их местоположением(адресом)")
+Rel(AdminService, locationController, "GET запросы для получения reports")
+
+SHOW_LEGEND()
+@enduml
