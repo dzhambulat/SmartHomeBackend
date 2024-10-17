@@ -22,9 +22,9 @@ entity Location {
   * deviceId: UUID
 }
 
-User --> Location : generates
-Location --> Device: contains
+User ||--o{ Location : generates
+Location  ||--o{ Device: has
 User --> TargetTemperature: generates
 TargetTemperature --> Device: has
-Device --> Telemetry: contains
+Device ||--o{ Telemetry: contains
 @enduml
