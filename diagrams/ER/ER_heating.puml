@@ -1,0 +1,30 @@
+@startuml
+entity User {
+  * id : UUID
+  * name : String
+}
+
+entity Device {
+  * id : UUID
+}
+
+entity TargetTemperature {
+    * deviceId: UUID
+    * temperature: Number
+}
+
+entity Telemetry {
+    * deviceId: UUID
+    * temperature: Number
+}
+entity Location {
+  * id : UUID
+  * deviceId: UUID
+}
+
+User ||--o{ Location : generates
+Location  ||--o{ Device: has
+User --> TargetTemperature: generates
+TargetTemperature --> Device: has
+Device ||--o{ Telemetry: contains
+@enduml

@@ -1,0 +1,28 @@
+
+@startuml
+class TelemetryService {
+    +handleCommand()
+    +handleQuery()
+}
+
+enum  SensorDataType{
+    On,
+    off,
+    temperature
+}
+class SaveSensorDataCommand {
+  * id : UUID
+  * type : SensorDataType
+  * timestamp : Date
+  * value : Number
+  +execute()
+}
+
+class  GetSensorDataQuery {
+  * id : UUID
+  +execute()
+}
+
+TelemetryService --> SaveSensorDataCommand : generates
+TelemetryService --> GetSensorDataQuery : generates
+@enduml

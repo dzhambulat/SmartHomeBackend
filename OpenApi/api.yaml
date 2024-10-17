@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  title: OpenAPI
+  version: 1.0.11
+paths:
+  /devices/{device_id}:
+    get:
+      summary: Возвращает подробную информацию о конкретном устройстве по его ID
+      description: ""
+      parameters:
+        - name: device_id
+          in: path
+          description: ID девайса
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Device information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "404":
+          description: Не найден device с таким ID
+  /devices/{device_id}/status:
+    put:
+      tags:
+        - devices
+      summary: Позволяет изменить состояние устройства (например, включить/выключить).
+      description: ""
+      parameters:
+        - name: device_id
+          in: path
+          description: ID девайса
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Данные для изменения состояния девайса
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Device_status"
+      responses:
+        "200":
+          description: Операция прошла успешно
+        "404":
+          description: Не найден device с таким ID
+  /devices/{device_id}/commands:
+    post:
+      tags:
+        - devices
+      summary: Отправляет команду устройству (например, «установить температуру 22 градуса»)
+      description: ""
+      parameters:
+        - name: device_id
+          in: path
+          description: ID устройства назначения команды
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Данные описывающие команду
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Command"
+      responses:
+        "200":
+          description: Команда выполнена успешно
+        "404":
+          description: Не найден device с таким ID
+  /devices/{device_id}/telemetry/latest:
+    get:
+      tags:
+        - telemetry
+      summary: Получение последних данных телеметрии
+      description: "Возвращает последнее полученное значение телеметрии для устройства."
+      parameters:
+        - name: device_id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Telemetry data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Telemetry"
+        "404":
+          description: Не найден device с таким ID
+  /devices/{device_id}/telemetry/:
+    get:
+      tags:
+        - telemetry
+      summary: Получение исторических данных телеметрии
+      description: "Возвращает исторические данные телеметрии для устройства за определённый период времен"
+      parameters:
+        - name: device_id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: startDate
+          in: query
+          description: начальная дата
+          required: true
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: конечная дата
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Telemetry data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Telemetry"
+        "404":
+          description: Не найден device с таким ID
+components:
+  schemas:
+    Device:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1045544
+        vendor_id:
+          type: string
+          example: "5DFEE456"
+    Device_status:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1045544
+        temperature:
+          type: integer
+          format: int64
+          example: 25
+        status:
+          type: boolean
+          example: true
+    Command:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          example: "turn_on"
+        target_temperature:
+          type: integer
+          format: int64
+          example: 27
+    Telemetry:
+      type: object
+      properties:
+        device_id:
+          type: string
+          example: "45DFGWWD"
+        temperature:
+          type: integer
+          example: "29"
+        timestamp:
+          type: integer
+          example: 4332432442442

@@ -1,3 +1,10 @@
+C4 лиаграммы уровня контекста, контейнеров, компонентов и кода хранятся в папке diagrams в соотвествующих подкаталогах. ER диаграмма хранится в также в diagrams в папке ER
+Описание API находится в OpenApi/api.yaml
+
+Описание доменов:
+В монолите я могу выделить только один домен: Управление отоплением
+Субдомены: Управление устройствами, Взаимодействие с пользователем
+
 # Базовая настройка
 
 ## Запуск minikube
@@ -8,6 +15,7 @@
 minikube start
 ```
 
+
 ## Добавление токена авторизации GitHub
 
 [Получение токена](https://github.com/settings/tokens/new)
@@ -15,6 +23,7 @@ minikube start
 ```bash
 kubectl create secret docker-registry ghcr --docker-server=https://ghcr.io --docker-username=<github_username> --docker-password=<github_token> -n default
 ```
+
 
 ## Установка API GW kusk
 
@@ -24,24 +33,11 @@ kubectl create secret docker-registry ghcr --docker-server=https://ghcr.io --doc
 kusk cluster install
 ```
 
-## Смена адреса образа в helm chart
-
-После того как вы сделали форк репозитория и у вас в репозитории отработал GitHub Action. Вам нужно получить адрес образа <https://github.com/><github_username>/architecture-sprint-3/pkgs/container/architecture-sprint-3
-
-Он выглядит таким образом
-```ghcr.io/<github_username>/architecture-sprint-3:latest```
-
-Замените адрес образа в файле `helm/smart-home-monolith/values.yaml` на полученный файл:
-
-```yaml
-image:
-  repository: ghcr.io/<github_username>/architecture-sprint-3
-  tag: latest
-```
 
 ## Настройка terraform
 
 [Установите Terraform](https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart#install-terraform)
+
 
 Создайте файл ~/.terraformrc
 
@@ -57,11 +53,10 @@ provider_installation {
 }
 ```
 
-## Применяем terraform конфигурацию
+## Применяем terraform конфигурацию 
 
 ```bash
 cd terraform
-terraform init
 terraform apply
 ```
 
@@ -77,6 +72,7 @@ kusk deploy -i api.yaml
 kubectl port-forward svc/kusk-gateway-envoy-fleet -n kusk-system 8080:80
 curl localhost:8080/hello
 ```
+
 
 ## Delete minikube
 

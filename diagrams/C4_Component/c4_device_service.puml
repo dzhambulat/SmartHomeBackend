@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(deviceServiceContainer, "Device Service") {
+
+    Component(deviceController, "Device Controller", "Golang endpoints", "Содержит эндпоинты для POST и GET запросов от UserService")
+    Component(deviceService, "Device Service", "Golang package", "Подключается к MQTT брокеру для управления устройствами")
+    Component(deviceRepository, "Device Repository", "Dynamo DB client", "Запись и чтение ид девайсов и целевых температур")
+    Component(kafkaConsumer, "Kafka Consumer", "Golang Kafka consumer", "Читает данные от сенсоров из топика Kafka")
+
+    Rel(deviceController, deviceService, "Направляет команды и запросы на управление")
+    Rel(deviceService, deviceRepository, "Получает и сохраняет данные об устройствах")
+    Rel(deviceService, kafkaConsumer, "Получает данные из kafkaConsumer")
+
+
+}
+
+Container_Ext(kafkaBroker, "Kafka Broker", "Apache Kafka", "Обрабатывает сообщения и управляет топиками.")
+Container_Ext(mqttBroker, "MQTT Broker", "MQTT Broker", "Отправляет команды устройствам")
+Container_Ext(userService, "User Service", "Node.js", "Передает команды для управления устройствами")
+Rel(deviceService, mqttBroker, "Контроль устройств через MQTT")
+Rel(userService, deviceController, "Отправка команд от пользователя")
+Rel(deviceService, kafkaBroker, "Чтение данных от сенсоров для сравнения с целевой температурой")
+
+SHOW_LEGEND()
+@enduml
